@@ -1,0 +1,49 @@
+# ===== Python =====
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+dist/
+build/
+
+# ===== Virtual Environment =====
+.venv/
+venv/
+env/
+ENV/
+
+# ===== Environment variables =====
+.env
+.env.*
+!.env.example
+
+# ===== FastAPI / Uvicorn =====
+*.log
+uvicorn.log
+
+# ===== Pytest =====
+.pytest_cache/
+.coverage
+htmlcov/
+
+# ===== IDEs =====
+.vscode/
+.idea/
+*.iml
+
+# ===== OS files =====
+.DS_Store
+Thumbs.db
+
+# ===== Mypy / Ruff / Lint =====
+.mypy_cache/
+.ruff_cache/
+
+# ===== Jupyter =====
+.ipynb_checkpoints/
+
+# ===== SQLite / Local DB =====
+*.sqlite3
+*.db
