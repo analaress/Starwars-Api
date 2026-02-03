@@ -8,14 +8,12 @@ async def test_get_person_uses_cache(mocker):
         "url": "https://swapi.dev/api/people/1/"
     }
 
-    mock_get = mocker.patch.object(
-        swapi_client.client,
-        "get",
-        return_value=mocker.Mock(json=lambda: fake_response)
+    mock_get = mocker.patch(
+        "app.clients.swapi_client._get",
+        return_value=fake_response
     )
 
     p1 = await swapi_client.get_person(1)
-
     p2 = await swapi_client.get_person(1)
 
     assert p1 == p2

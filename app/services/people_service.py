@@ -17,40 +17,40 @@ async def list_people(
 
     if film:
         film_data = await get_film(film)
-        ids = {extract_id(url) for url in film_data["characters"]}
+        ids = {extract_id(url) for url in film_data.get("characters", [])}
         people_ids = ids if people_ids is None else people_ids & ids
 
     if homeworld:
         planet_data = await get_planet(homeworld)
-        ids = {extract_id(url) for url in planet_data["residents"]}
+        ids = {extract_id(url) for url in planet_data.get("residents", [])}
         people_ids = ids if people_ids is None else people_ids & ids
 
     if species:
         species_data = await get_species(species)
-        ids = {extract_id(url) for url in species_data["people"]}
+        ids = {extract_id(url) for url in species_data.get("people", [])}
         people_ids = ids if people_ids is None else people_ids & ids
 
     if people_ids is None:
         data = await get_people(page)
-        people_ids = {extract_id(p["url"]) for p in data["results"]}
+        people_ids = {extract_id(p["url"]) for p in data.get("results", [])}
 
-    import asyncio
     people_data = await asyncio.gather(
         *[get_person(pid) for pid in people_ids]
     )
 
     results = [
         {
-            "id": extract_id(p["url"]),
-            "name": p["name"],
-            "gender": p["gender"],
-            "homeworld": extract_id(p["homeworld"])
+            "id": extract_id(p.get("url")),
+            "name": p.get("name"),
+            "gender": p.get("gender"),
+            "homeworld": extract_id(p["homeworld"]) if p.get("homeworld") else None,
+            "birth_year": p.get("birth_year"),
         }
         for p in people_data
     ]
 
     if order_by:
-        results.sort(key=lambda x: x.get(order_by) or "")
+        results.sort(key=lambda x: (x.get(order_by) is None, x.get(order_by)))
 
     return {
         "count": len(results),
@@ -59,19 +59,22 @@ async def list_people(
 
 
 async def get_person_detail(person_id: int, expand: list[str] | None = None):
+    if isinstance(expand, str):
+        expand = expand.split(",")
+
     expand = expand or []
 
     data = await get_person(person_id)
 
     result = {
         "id": person_id,
-        "name": data["name"],
-        "birth_year": data["birth_year"],
-        "height": data["height"],
-        "mass": data["mass"],
-        "hair_color": data["hair_color"],
-        "eye_color": data["eye_color"],
-        "gender": data["gender"]
+        "name": data.get("name"),
+        "birth_year": data.get("birth_year"),
+        "height": data.get("height"),
+        "mass": data.get("mass"),
+        "hair_color": data.get("hair_color"),
+        "eye_color": data.get("eye_color"),
+        "gender": data.get("gender"),
     }
 
     tasks = []
@@ -83,20 +86,19 @@ async def get_person_detail(person_id: int, expand: list[str] | None = None):
 
     if "films" in expand:
         task_map["films"] = [
-            get_film(extract_id(url)) for url in data["films"]
+            get_film(extract_id(url)) for url in data.get("films", [])
         ]
         tasks.extend(task_map["films"])
 
-    if tasks:
-        responses = await asyncio.gather(*tasks)
+    responses = await asyncio.gather(*tasks) if tasks else []
 
     idx = 0
 
     if "homeworld" in task_map:
         homeworld = responses[idx]
         result["homeworld"] = {
-            "name": homeworld["name"],
-            "population": homeworld["population"]
+            "name": homeworld.get("name"),
+            "population": homeworld.get("population"),
         }
         idx += 1
 
@@ -104,12 +106,12 @@ async def get_person_detail(person_id: int, expand: list[str] | None = None):
         films = responses[idx:]
         result["films"] = [
             {
-                "title": f["title"],
-                "release_date": f["release_date"]
+                "id": extract_id(f.get("url")) if f.get("url") else None,
+                "title": f.get("title"),
+                "episode_id": f.get("episode_id"),
+                "release_date": f.get("release_date"),
             }
             for f in films
         ]
 
     return result
-
-
