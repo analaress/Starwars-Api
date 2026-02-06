@@ -95,28 +95,35 @@ Isso garante que a mesma aplicação:
 
 ---
 
-## Diagrama de Arquitetura (Mermaid)
+## Diagrama de Arquitetura
 
 ```mermaid
-flowchart LR
-    User[Cliente / Frontend] --> Gateway[API Gateway]
+flowchart TD
+    Client[Client / Frontend / API Consumer] -->|HTTP| Ingress{Ingress}
+    Ingress -->|Local| Uvicorn[Uvicorn -> FastAPI app]
+    Ingress -->|GCP| Gateway[API Gateway]
+    Gateway --> CloudFn[Cloud Functions Gen 2]
+    CloudFn --> Vellox[Vellox adapter]
+    Vellox --> FastAPI[FastAPI Routers]
 
-    Gateway --> CF[Cloud Functions Gen 2]
+    FastAPI --> Root[/GET / health/]
+    FastAPI --> Auth[/POST /register<br/>POST /login/]
+    FastAPI --> Protected[/people /films /stats/]
 
-    CF --> Vellox[Vellox\nASGI Adapter]
+    Auth --> Security[Argon2 hash + JWT create/verify]
+    Security --> UserDB[(PostgreSQL users table)]
 
-    subgraph App ["FastAPI (Docker Container)"]
-        Routers[Routers / API Layer]
-        Services[Services / Business Logic]
-        Clients[SWAPI Client]
-        Security[JWT Auth & Security]
-        Cache[(TTL Cache em Memória)]
-    end
+    Protected --> TokenCheck[OAuth2 Bearer dependency<br/>get_current_user]
+    TokenCheck --> Security
+    TokenCheck --> UserDB
 
-    Vellox --> Routers
+    Protected --> Services[Service layer<br/>people/films/stats]
+    Services --> SwapiClient[Async SWAPI client]
+    SwapiClient --> Cache[(TTL in-memory caches)]
+    SwapiClient --> SWAPI[(swapi.dev)]
 
-    Security --> DB[(Cloud SQL - PostgreSQL)]
-    Clients --> SWAPI[SWAPI - External API]
+    Services --> Response[Transformed + aggregated JSON]
+    Response --> Client
 ```
 
 ---
@@ -200,7 +207,10 @@ Demonstra agregações e análise de dados.
 ### `.env` / `.env.docker`
 
 ```env
-SWAPI_BASE_URL=https://swapi.dev/api
+# Alternativa de direcionamento no GCP. Use o espelho:
+# https://swapi.py4e.com/api
+
+SWAPI_BASE_URL=https://swapi.py4e.com/api
 DATABASE_URL=postgresql://user:password@db:5432/starwars_db
 SECRET_KEY=change_me
 ACCESS_TOKEN_EXPIRE_MINUTES=30

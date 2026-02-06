@@ -3,7 +3,7 @@ info:
   title: Star Wars API Gateway
   version: 1.0.0
 
-host: us-central1-project-fafaead2-7fdc-47e5-a77.cloudfunctions.net
+host: starwars-gateway-9r7n1klr.uc.gateway.dev
 schemes:
   - https
 
@@ -12,6 +12,7 @@ paths:
     post:
       summary: "Rota pública de registro"
       operationId: register
+      security: []
       x-google-backend:
         address: https://us-central1-project-fafaead2-7fdc-47e5-a77.cloudfunctions.net/starwars-api/register
       responses:
@@ -22,6 +23,7 @@ paths:
     post:
       summary: "Rota pública de login"
       operationId: login
+      security: []
       x-google-backend:
         address: https://us-central1-project-fafaead2-7fdc-47e5-a77.cloudfunctions.net/starwars-api/login
       responses:
@@ -32,6 +34,7 @@ paths:
     get:
       summary: "Rota GET autenticada"
       operationId: getPeople
+      security: []
       x-google-backend:
         address: https://us-central1-project-fafaead2-7fdc-47e5-a77.cloudfunctions.net/starwars-api/people
       parameters:
@@ -49,6 +52,7 @@ paths:
     get:
       summary: "Rota GET autenticada com path parameter"
       operationId: getPersonDetail
+      security: []
       x-google-backend:
         address: https://us-central1-project-fafaead2-7fdc-47e5-a77.cloudfunctions.net/starwars-api/people/{person_id}
       parameters:
@@ -64,6 +68,7 @@ paths:
     get:
       summary: "Rota GET autenticada"
       operationId: getFilms
+      security: []
       x-google-backend:
         address: https://us-central1-project-fafaead2-7fdc-47e5-a77.cloudfunctions.net/starwars-api/films
       responses:
@@ -74,6 +79,7 @@ paths:
     get:
       summary: "Rota GET autenticada para eras dos filmes"
       operationId: getFilmsEras
+      security: []
       x-google-backend:
         address: https://us-central1-project-fafaead2-7fdc-47e5-a77.cloudfunctions.net/starwars-api/films/eras
       responses:
@@ -85,6 +91,7 @@ paths:
     get:
       summary: "Rota GET autenticada"
       operationId: getStats
+      security: []
       x-google-backend:
         address: https://us-central1-project-fafaead2-7fdc-47e5-a77.cloudfunctions.net/starwars-api/stats
       responses:
@@ -100,9 +107,3 @@ paths:
       responses:
         200:
           description: OK
-
-securityDefinitions:
-  BearerAuth:
-    type: apiKey
-    name: Authorization
-    in: header
