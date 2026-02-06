@@ -1,0 +1,108 @@
+swagger: "2.0"
+info:
+  title: Star Wars API Gateway
+  version: 1.0.0
+
+host: us-central1-project-fafaead2-7fdc-47e5-a77.cloudfunctions.net
+schemes:
+  - https
+
+paths:
+  /register:
+    post:
+      summary: "Rota pública de registro"
+      operationId: register
+      x-google-backend:
+        address: https://us-central1-project-fafaead2-7fdc-47e5-a77.cloudfunctions.net/starwars-api/register
+      responses:
+        200:
+          description: OK
+
+  /login:
+    post:
+      summary: "Rota pública de login"
+      operationId: login
+      x-google-backend:
+        address: https://us-central1-project-fafaead2-7fdc-47e5-a77.cloudfunctions.net/starwars-api/login
+      responses:
+        200:
+          description: OK
+
+  /people:
+    get:
+      summary: "Rota GET autenticada"
+      operationId: getPeople
+      x-google-backend:
+        address: https://us-central1-project-fafaead2-7fdc-47e5-a77.cloudfunctions.net/starwars-api/people
+      parameters:
+        - name: page
+          in: query
+          type: integer
+        - name: search
+          in: query
+          type: string
+      responses:
+        200:
+          description: OK
+
+  /people/{person_id}:
+    get:
+      summary: "Rota GET autenticada com path parameter"
+      operationId: getPersonDetail
+      x-google-backend:
+        address: https://us-central1-project-fafaead2-7fdc-47e5-a77.cloudfunctions.net/starwars-api/people/{person_id}
+      parameters:
+        - name: person_id
+          in: path
+          required: true
+          type: string
+      responses:
+        200:
+          description: OK
+
+  /films:
+    get:
+      summary: "Rota GET autenticada"
+      operationId: getFilms
+      x-google-backend:
+        address: https://us-central1-project-fafaead2-7fdc-47e5-a77.cloudfunctions.net/starwars-api/films
+      responses:
+        200:
+          description: OK
+  
+  /films/eras:
+    get:
+      summary: "Rota GET autenticada para eras dos filmes"
+      operationId: getFilmsEras
+      x-google-backend:
+        address: https://us-central1-project-fafaead2-7fdc-47e5-a77.cloudfunctions.net/starwars-api/films/eras
+      responses:
+        200:
+          description: OK
+
+
+  /stats:
+    get:
+      summary: "Rota GET autenticada"
+      operationId: getStats
+      x-google-backend:
+        address: https://us-central1-project-fafaead2-7fdc-47e5-a77.cloudfunctions.net/starwars-api/stats
+      responses:
+        200:
+          description: OK
+
+  /health:
+    get:
+      summary: "Rota pública de health"
+      operationId: healthCheck
+      x-google-backend:
+        address: https://us-central1-project-fafaead2-7fdc-47e5-a77.cloudfunctions.net/starwars-api
+      responses:
+        200:
+          description: OK
+
+securityDefinitions:
+  BearerAuth:
+    type: apiKey
+    name: Authorization
+    in: header

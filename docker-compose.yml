@@ -1,4 +1,12 @@
 services:
+  api:
+    build: .
+    env_file:
+      - .env.docker
+    depends_on:
+      - db
+    ports:
+      - "8080:8080"
   db:
     image: postgres:15
     environment:
